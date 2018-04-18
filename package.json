@@ -2,7 +2,7 @@
   "name": "bookshelf-jsonapi-params",
   "version": "1.0.0",
   "description": "Automatically applies relations, filters, and more from the JSON API spec to your Bookshelf.js results",
-  "main": "./src/index.js",
+  "main": "./dist/index.js",
   "options": {
     "mocha": "--compilers js:babel-core/register --bail test"
   },
