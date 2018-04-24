@@ -240,6 +240,11 @@ export default (Bookshelf, options = {}) => {
          */
         internals.buildDependenciesHelper = (key, relationHash) => {
 
+            const extract = internals.extractFunction(key);
+            if (extract) {
+                key = extract.column;
+            }
+
             if (_includes(key, '.')){
                 // The last item in the chain is a column name, not a table. Do not include column name in relationHash
                 key = key.substring(0, key.lastIndexOf('.'));
