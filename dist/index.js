@@ -238,6 +238,11 @@ exports.default = function (Bookshelf) {
          */
         internals.buildDependenciesHelper = function (key, relationHash) {
 
+            var extract = internals.extractFunction(key);
+            if (extract) {
+                key = extract.column;
+            }
+
             if ((0, _lodash.includes)(key, '.')) {
                 // The last item in the chain is a column name, not a table. Do not include column name in relationHash
                 key = key.substring(0, key.lastIndexOf('.'));
@@ -369,7 +374,7 @@ exports.default = function (Bookshelf) {
                                     // Determine if there are multiple filters to be applied
                                     var valueArray = null;
                                     if (!(0, _lodash.isArray)(typeValue)) {
-                                        valueArray = (0, _splitString2.default)(typeValue.toString(), ',');
+                                        valueArray = typeValue !== null && typeValue !== 'null' ? (0, _splitString2.default)(typeValue.toString(), ',') : [null];
                                     } else {
                                         valueArray = typeValue;
                                     }
@@ -408,6 +413,14 @@ exports.default = function (Bookshelf) {
                                             }
                                         });
                                     } else if (key === 'not') {
+                                        if (valueArray.find(function (val) {
+                                            return val === null || val === 'null';
+                                        }) !== undefined) {
+                                            qb.whereNotNull(typeKey);
+                                            valueArray = valueArray.filter(function (val) {
+                                                return val !== null && val !== 'null';
+                                            });
+                                        }
                                         qb.whereNotIn(typeKey, valueArray);
                                     } else if (key === 'lt') {
                                         qb.where(typeKey, '<', typeValue);
@@ -433,6 +446,8 @@ exports.default = function (Bookshelf) {
                                         key = Bookshelf.knex.raw(extract.function + '(??)', extract.column);
                                     }
 
+                                    value = value === 'null' ? null : value;
+
                                     if ((0, _lodash.isNull)(value)) {
                                         qb.where(key, value);
                                     } else {
@@ -440,7 +455,15 @@ exports.default = function (Bookshelf) {
                                         if (!(0, _lodash.isArray)(value)) {
                                             value = (0, _splitString2.default)(value.toString(), ',');
                                         }
-                                        qb.whereIn(key, value);
+                                        if (value.find(function (val) {
+                                            return val === 'null' || val === null;
+                                        }) !== undefined) {
+                                            qb.whereNull(key);
+                                            value = value.filter(function (val) {
+                                                return val !== 'null' && val !== null;
+                                            });
+                                        }
+                                        qb.orWhereIn(key, value);
                                     }
                                 }
                             }
