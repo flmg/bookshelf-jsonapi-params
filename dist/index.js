@@ -456,14 +456,21 @@ exports.default = function (Bookshelf) {
                                             value = (0, _splitString2.default)(value.toString(), ',');
                                         }
                                         if (value.find(function (val) {
-                                            return val === 'null' || val === null;
+                                            return val === null || val === 'null';
                                         }) !== undefined) {
-                                            qb.whereNull(key);
                                             value = value.filter(function (val) {
                                                 return val !== 'null' && val !== null;
                                             });
+                                            qb.where(function (qbWhere) {
+
+                                                qbWhere.whereNull(key);
+                                                if (!(0, _lodash.isEmpty)(value)) {
+                                                    qbWhere.orWhereIn(key, value);
+                                                }
+                                            });
+                                        } else {
+                                            qb.whereIn(key, value);
                                         }
-                                        qb.orWhereIn(key, value);
                                     }
                                 }
                             }
